@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./CalendarModal.css";
 
 import Modal from "react-modal";
@@ -10,6 +10,9 @@ import 'sweetalert2/dist/sweetalert2.min.css'
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from 'date-fns/locale/es';
+
+import { useCalendarStore, useUiStore } from "../../hooks";
+// import { onCloseDateModal } from "../../store";
 
 registerLocale ( 'es', es );
 
@@ -28,14 +31,15 @@ Modal.setAppElement("#root");
 
 export const CalendarModal = () => {
 
-  const [ isOpen, setIsOpen] = useState(true);
+  const { isDateModalOpen, closeDateModal } = useUiStore();
+  const { activeEvent, startSavingEvent } = useCalendarStore();
 
   const [ formSubmitted, setFormSubmitted] = useState(false)
 
   const [formValues, setFormValues] = useState({
 
-    title: 'Julian',
-    notes: 'Trabazzo',
+    title: '',
+    notes: '',
     start: new Date(),
     end: addHours(new Date(), 2),
 
@@ -49,6 +53,15 @@ export const CalendarModal = () => {
         : 'is-invalid';
 
   }, [ formValues.title, formSubmitted])
+
+  useEffect(() => {
+    
+    if (activeEvent !== null) {
+      setFormValues({...activeEvent})
+    }
+
+  }, [ activeEvent ])
+  
 
   const onImputChange = ({ target }) => {
     setFormValues({ 
@@ -66,10 +79,10 @@ export const CalendarModal = () => {
   }
 
   const onCloseModal = () => {
-    setIsOpen(false);
+    closeDateModal();
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
     setFormSubmitted( true )
 
@@ -80,16 +93,19 @@ export const CalendarModal = () => {
         return;
     }
     if ( formValues.title.length <= 0 ) return;
+
     console.log( formValues );
 
-
+    await startSavingEvent( formValues );
+    closeDateModal ();
+    setFormSubmitted( false );
 
   }
 
   return (
     <Modal
-      isOpen={isOpen}
-      onRequestClose={onCloseModal}
+      isOpen={ isDateModalOpen }
+      onRequestClose={ onCloseModal }
       style={customStyles}
       className="modal"
       overlayClassName="modal-fondo"
