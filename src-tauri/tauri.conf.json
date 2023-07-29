@@ -38,8 +38,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "calendar-app",
-        "width": 1280,
-        "height": 720
+        "width": 300,
+        "height": 300
       }
     ]
   }
