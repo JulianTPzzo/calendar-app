@@ -68,7 +68,7 @@ export const calendarSlice = createSlice({
             state.events = [],
             state.activeEvent = null
 
-            }
+        }
 
     }
 });
